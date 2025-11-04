@@ -111,6 +111,11 @@ export default function App() {
     }
   };
 
+  const handleComposerFocus = () => {
+    setIsNearBottom(true);
+    requestAnimationFrame(() => setTimeout(scrollToBottom, 60));
+  };
+
   useEffect(() => {
     if (!messagesContainerRef.current) return;
     if (!isNearBottom) return; // don't jump when user is reading history
@@ -260,8 +265,9 @@ export default function App() {
     .ai-list { list-style: decimal; margin: 0.25rem 0 0 1.25rem; }
     .ai-list li { margin: 0.25rem 0; }
     .ai-list strong { color: #fff; font-weight: 700; }
+     .composer-sticky { position: sticky; bottom: 0; z-index: 20; padding-bottom: env(safe-area-inset-bottom); background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.18) 60%); }
      .touch-scroll{ -webkit-overflow-scrolling: touch; }
-     @media(max-width:768px){ .sidebar{position:fixed;left:0;top:0;width:80%;height:100%;z-index:50;transform:translateX(-100%);transition:transform .3s ease;} .sidebar.open{transform:translateX(0);} .app-root{height:calc(100vh - 20px);} }
+     @media(max-width:768px){ .sidebar{position:fixed;left:0;top:0;width:80%;height:100%;z-index:50;transform:translateX(-100%);transition:transform .3s ease;} .sidebar.open{transform:translateX(0);} .app-root{height:calc(100vh - 20px); overflow-y:auto;} }
   `;
 
   return (
@@ -327,7 +333,7 @@ export default function App() {
       </aside>
 
       {/* Main Area */}
-      <main className="flex-1 flex flex-col md:p-6 p-3">
+      <main className="flex-1 flex flex-col md:p-6 p-3 min-h-0">
         <header className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-3">
             <button className="md:hidden p-2 bg-white/10 rounded-md" onClick={() => setSidebarOpen(true)}>
@@ -342,7 +348,7 @@ export default function App() {
         <div
           ref={messagesContainerRef}
           onScroll={handleMessagesScroll}
-          className="flex-1 overflow-y-auto touch-scroll pb-4 space-y-4 glass-strong rounded-2xl p-4 border border-white/10 animate-card"
+          className="flex-1 overflow-y-auto touch-scroll pb-28 md:pb-6 space-y-4 glass-strong rounded-2xl p-4 border border-white/10 animate-card"
         >
           {activeChat.messages.length === 0 ? (
             <div className="h-full flex flex-col justify-center items-center text-gray-400">
@@ -400,12 +406,13 @@ export default function App() {
         </div>
 
          {/* Input */}
-         <div className="mt-3 flex items-center gap-1 glass-strong rounded-xl p-2 md:px-4 border border-white/10 animate-card">
+        <div className="composer-sticky mt-3 flex items-center gap-1 glass-strong rounded-xl p-2 md:px-4 border border-white/10 animate-card">
           <input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+            onFocus={handleComposerFocus}
             
              className="flex-1 bg-transparent outline-none px-3 text-white placeholder:text-gray-400"
           />
