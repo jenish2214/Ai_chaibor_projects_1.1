@@ -32,6 +32,47 @@ const cleanResponse = (text) =>
     .replace(/```[\s\S]*?```/g, "")
     .replace(/`([^`]*)`/g, "$1");
 
+// Escape HTML to avoid injection; we only render what we generate
+const escapeHtml = (s) =>
+  s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+// Convert AI response into numbered, readable HTML with bolded main point
+const toNumberedHtml = (text) => {
+  if (!text) return "";
+  // If it already looks like a list, keep lines as items
+  const looksLikeList = /(^|\n)\s*([-•\d]+[\.)]|[-•])/m.test(text);
+  const lines = looksLikeList
+    ? text.split(/\n+/).map((l) => l.trim()).filter(Boolean)
+    : text
+        .split(/(?<=[\.!?])\s+/)
+        .map((s) => s.trim())
+        .filter((s) => s && s.length > 1);
+
+  if (lines.length === 0) return escapeHtml(text);
+
+  const items = lines.map((line) => {
+    const safe = escapeHtml(line.replace(/^[-•\d\.)\s]+/, ""));
+    // Bold up to a delimiter if present, otherwise bold first few words
+    const delimiterMatch = safe.match(/[:\-\u2014]\s/); // :, -, —
+    if (delimiterMatch) {
+      const idx = delimiterMatch.index;
+      const head = safe.slice(0, idx).trim();
+      const tail = safe.slice(idx + delimiterMatch[0].length).trim();
+      return `<li><strong>${head}</strong>${tail ? ` — ${tail}` : ""}</li>`;
+    }
+    const words = safe.split(/\s+/);
+    const head = words.slice(0, Math.min(4, words.length)).join(" ");
+    const tail = words.slice(Math.min(4, words.length)).join(" ");
+    return `<li><strong>${head}</strong>${tail ? ` — ${tail}` : ""}</li>`;
+  });
+  return `<ol class="ai-list">${items.join("")}</ol>`;
+};
+
 export default function App() {
   const [chats, setChats] = useState(() => {
     const saved = localStorage.getItem("gemini_chats");
@@ -59,11 +100,25 @@ export default function App() {
 
   const [isNearBottom, setIsNearBottom] = useState(true);
 
+  const scrollToBottom = () => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    try {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    } catch (_) {
+      // Fallback for browsers that don't support smooth option
+      el.scrollTop = el.scrollHeight;
+    }
+  };
+
   useEffect(() => {
     if (!messagesContainerRef.current) return;
     if (!isNearBottom) return; // don't jump when user is reading history
-    const el = messagesContainerRef.current;
-    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    // Wait for layout/paint on mobile before scrolling
+    requestAnimationFrame(() => {
+      scrollToBottom();
+      setTimeout(scrollToBottom, 50);
+    });
   }, [activeChat?.messages, loading, isNearBottom]);
 
   const handleMessagesScroll = () => {
@@ -119,6 +174,7 @@ export default function App() {
   const sendMessage = async () => {
     const text = input.trim();
     if (!text) return;
+    setIsNearBottom(true); // ensure we auto-scroll after sending
     const userMsg = { id: crypto.randomUUID(), sender: "user", text };
     const updated = { ...activeChat, messages: [...activeChat.messages, userMsg] };
     updateChat(updated);
@@ -137,11 +193,11 @@ export default function App() {
         }
       );
       const data = await res.json();
-      const botText =
-        cleanResponse(data?.candidates?.[0]?.content?.parts?.[0]?.text) ||
-        "⚠️ Something went wrong.";
+      const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      const cleaned = cleanResponse(raw);
+      const botHtml = toNumberedHtml(cleaned) || escapeHtml("⚠️ Something went wrong.");
 
-      const botMsg = { id: crypto.randomUUID(), sender: "ai", text: botText };
+      const botMsg = { id: crypto.randomUUID(), sender: "ai", text: botHtml, html: true };
       updateChat({ ...updated, messages: [...updated.messages, botMsg] });
     } catch (err) {
       updateChat({
@@ -201,7 +257,11 @@ export default function App() {
      .animate-card { animation: fadeSlide .35s ease both; }
      @keyframes spin { to { transform: rotate(360deg); } }
      .spinner { width:16px; height:16px; border-radius:50%; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; animation: spin .8s linear infinite; }
-      @media(max-width:768px){ .sidebar{position:fixed;left:0;top:0;width:80%;height:100%;z-index:50;transform:translateX(-100%);transition:transform .3s ease;} .sidebar.open{transform:translateX(0);} .app-root{height:calc(100vh - 20px);} }
+    .ai-list { list-style: decimal; margin: 0.25rem 0 0 1.25rem; }
+    .ai-list li { margin: 0.25rem 0; }
+    .ai-list strong { color: #fff; font-weight: 700; }
+     .touch-scroll{ -webkit-overflow-scrolling: touch; }
+     @media(max-width:768px){ .sidebar{position:fixed;left:0;top:0;width:80%;height:100%;z-index:50;transform:translateX(-100%);transition:transform .3s ease;} .sidebar.open{transform:translateX(0);} .app-root{height:calc(100vh - 20px);} }
   `;
 
   return (
@@ -316,7 +376,11 @@ export default function App() {
                       : "glass text-gray-100"
                   }`}
                 >
-                  {msg.text}
+                  {msg.sender === "ai" && msg.html ? (
+                    <div className="leading-relaxed" dangerouslySetInnerHTML={{ __html: msg.text }} />
+                  ) : (
+                    <div className="whitespace-pre-wrap leading-relaxed">{msg.text}</div>
+                  )}
                 </div>
               </div>
             ))
