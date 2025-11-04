@@ -161,7 +161,7 @@ export default function App() {
   `;
 
   return (
-    <div className="h-screen w-full font-Inter flex flex-col md:flex-row relative overflow-hidden text-white">
+    <div className="h-screen w-full font-Inter flex flex-col md:flex-row relative overflow-hidden text-white md:[height:90vh]">
       <style>{inlineCss}</style>
        <div className="absolute inset-0 bg-grad bg-anim -z-10" />
 
