@@ -155,6 +155,8 @@ export default function App() {
      .bg-anim { animation: gradientShift 20s ease-in-out infinite; background-size: 200% 200%; }
      @keyframes fadeSlide { from{opacity:0; transform: translateY(8px)} to{opacity:1; transform: translateY(0)} }
      .animate-card { animation: fadeSlide .35s ease both; }
+     @keyframes spin { to { transform: rotate(360deg); } }
+     .spinner { width:16px; height:16px; border-radius:50%; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; animation: spin .8s linear infinite; }
     @media(max-width:768px){ .sidebar{position:fixed;left:0;top:0;width:80%;height:100%;z-index:50;transform:translateX(-100%);transition:transform .3s ease;} .sidebar.open{transform:translateX(0);} }
   `;
 
@@ -301,7 +303,7 @@ export default function App() {
             disabled={loading}
              className="p-2  bg-gradient-to-r from-indigo-500 to-violet-600 rounded-md text-white hover:scale-105 transition"
           >
-            <FiSend />
+             {loading ? <span className="spinner" /> : <FiSend />}
           </button>
         </div>
       </main>
