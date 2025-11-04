@@ -3,9 +3,7 @@ import {
   FiMenu,
   FiSend,
   FiMic,
-  FiPaperclip,
-  FiDownload,
-  FiSearch,
+  
   FiTrash2,
   FiCopy,
   FiEdit2,
@@ -38,7 +36,7 @@ const generateTitleFromText = (text) => {
   const cleaned = text
     .replace(/\s+/g, " ")
     .replace(/[\r\n]+/g, " ")
-    .replace(/[`_*#>\[\](){}]/g, "")
+    .replace(/[`_*#>[\](){}]/g, "")
     .trim();
   const words = cleaned.split(" ");
   const slice = words.slice(0, 7).join(" ");
@@ -59,18 +57,18 @@ const escapeHtml = (s) =>
 const toNumberedHtml = (text) => {
   if (!text) return "";
   // If it already looks like a list, keep lines as items
-  const looksLikeList = /(^|\n)\s*([-•\d]+[\.)]|[-•])/m.test(text);
+  const looksLikeList = /(^|\n)\s*([-•\d]+[.)]|[-•])/m.test(text);
   const lines = looksLikeList
     ? text.split(/\n+/).map((l) => l.trim()).filter(Boolean)
     : text
-        .split(/(?<=[\.!?])\s+/)
+        .split(/(?<=[.!?])\s+/)
         .map((s) => s.trim())
         .filter((s) => s && s.length > 1);
 
   if (lines.length === 0) return escapeHtml(text);
 
   const items = lines.map((line) => {
-    const safe = escapeHtml(line.replace(/^[-•\d\.)\s]+/, ""));
+    const safe = escapeHtml(line.replace(/^[-•\d.)\s]+/, ""));
     // Bold up to a delimiter if present, otherwise bold first few words
     const delimiterMatch = safe.match(/[:\-\u2014]\s/); // :, -, —
     if (delimiterMatch) {
@@ -97,7 +95,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [query, setQuery] = useState("");
+  
   const [showSelectModal, setShowSelectModal] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // desktop only
 
@@ -119,9 +117,10 @@ export default function App() {
     if (!el) return;
     try {
       el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-    } catch (_) {
+    } catch (err) {
       // Fallback for browsers that don't support smooth option
       el.scrollTop = el.scrollHeight;
+      console.log(err)
     }
   };
 
