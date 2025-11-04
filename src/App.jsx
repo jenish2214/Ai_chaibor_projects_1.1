@@ -299,7 +299,7 @@ export default function App() {
           <button
             onClick={sendMessage}
             disabled={loading}
-             className="p-2 mr-10 bg-gradient-to-r from-indigo-500 to-violet-600 rounded-md text-white hover:scale-105 transition"
+             className="p-2  bg-gradient-to-r from-indigo-500 to-violet-600 rounded-md text-white hover:scale-105 transition"
           >
             <FiSend />
           </button>
