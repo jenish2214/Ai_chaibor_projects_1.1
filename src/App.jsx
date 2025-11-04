@@ -157,11 +157,11 @@ export default function App() {
      .animate-card { animation: fadeSlide .35s ease both; }
      @keyframes spin { to { transform: rotate(360deg); } }
      .spinner { width:16px; height:16px; border-radius:50%; border:2px solid rgba(255,255,255,.35); border-top-color:#fff; animation: spin .8s linear infinite; }
-    @media(max-width:768px){ .sidebar{position:fixed;left:0;top:0;width:80%;height:100%;z-index:50;transform:translateX(-100%);transition:transform .3s ease;} .sidebar.open{transform:translateX(0);} }
+      @media(max-width:768px){ .sidebar{position:fixed;left:0;top:0;width:80%;height:100%;z-index:50;transform:translateX(-100%);transition:transform .3s ease;} .sidebar.open{transform:translateX(0);} .app-root{height:calc(100vh - 20px);} }
   `;
 
   return (
-    <div className="h-screen w-full font-Inter flex flex-col md:flex-row relative overflow-hidden text-white md:[height:90vh]">
+    <div className="app-root h-screen w-full font-Inter flex flex-col md:flex-row relative overflow-hidden text-white ">
       <style>{inlineCss}</style>
        <div className="absolute inset-0 bg-grad bg-anim -z-10" />
 
