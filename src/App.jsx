@@ -229,7 +229,7 @@ export default function App() {
             <button className="md:hidden p-2 bg-white/10 rounded-md" onClick={() => setSidebarOpen(true)}>
               <FiMenu />
             </button>
-            <h1 className="text-xl font-semibold">Gemini — Refined</h1>
+            <h1 className="text-xl font-semibold">AI Assistant</h1>
           </div>
           <button onClick={() => clearChat(activeChatId)} className="hidden md:inline-block bg-white/10 px-3 py-1.5 rounded-full text-sm hover:bg-white/20">Clear</button>
         </header>
