@@ -270,7 +270,7 @@ export default function App() {
           {activeChat.messages.length === 0 ? (
             <div className="h-full flex flex-col justify-center items-center text-gray-400">
               <h3 className="text-lg font-semibold text-white/90 mb-2">Start a Conversation ✨</h3>
-              <p className="text-sm">Ask Gemini anything.</p>
+              
             </div>
           ) : (
             activeChat.messages.map((msg) => (
@@ -325,7 +325,7 @@ export default function App() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
-            placeholder="Ask Gemini..."
+            
              className="flex-1 bg-transparent outline-none px-3 text-white placeholder:text-gray-400"
           />
           <label className="cursor-pointer text-gray-300">
