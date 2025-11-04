@@ -342,7 +342,7 @@ export default function App() {
         <div
           ref={messagesContainerRef}
           onScroll={handleMessagesScroll}
-          className="flex-1 overflow-y-auto pb-4 space-y-4 glass-strong rounded-2xl p-4 border border-white/10 animate-card"
+          className="flex-1 overflow-y-auto touch-scroll pb-4 space-y-4 glass-strong rounded-2xl p-4 border border-white/10 animate-card"
         >
           {activeChat.messages.length === 0 ? (
             <div className="h-full flex flex-col justify-center items-center text-gray-400">
