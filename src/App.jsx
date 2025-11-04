@@ -47,6 +47,7 @@ export default function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // desktop only
 
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
   const recognitionRef = useRef(null);
 
@@ -56,9 +57,21 @@ export default function App() {
     localStorage.setItem("gemini_chats", JSON.stringify(chats));
   }, [chats]);
 
+  const [isNearBottom, setIsNearBottom] = useState(true);
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [activeChat?.messages, loading]);
+    if (!messagesContainerRef.current) return;
+    if (!isNearBottom) return; // don't jump when user is reading history
+    const el = messagesContainerRef.current;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  }, [activeChat?.messages, loading, isNearBottom]);
+
+  const handleMessagesScroll = () => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    setIsNearBottom(distanceFromBottom < 120);
+  };
 
   useEffect(() => {
     if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) return;
@@ -265,8 +278,12 @@ export default function App() {
           <button onClick={() => clearChat(activeChatId)} className="hidden md:inline-block bg-white/10 px-3 py-1.5 rounded-full text-sm hover:bg-white/20">Clear</button>
         </header>
 
-         {/* Messages */}
-         <div className="flex-1 overflow-y-auto pb-4 space-y-4 glass-strong rounded-2xl p-4 border border-white/10 animate-card">
+        {/* Messages */}
+        <div
+          ref={messagesContainerRef}
+          onScroll={handleMessagesScroll}
+          className="flex-1 overflow-y-auto pb-4 space-y-4 glass-strong rounded-2xl p-4 border border-white/10 animate-card"
+        >
           {activeChat.messages.length === 0 ? (
             <div className="h-full flex flex-col justify-center items-center text-gray-400">
               <h3 className="text-lg font-semibold text-white/90 mb-2">Start a Conversation ✨</h3>
