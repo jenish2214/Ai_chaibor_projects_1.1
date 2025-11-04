@@ -361,7 +361,7 @@ export default function App() {
         <div
           ref={messagesContainerRef}
           onScroll={handleMessagesScroll}
-          className="flex-1 overflow-y-auto touch-scroll pb-28 md:pb-6 space-y-4 glass-strong rounded-2xl p-4 border border-white/10 animate-card"
+          className="flex-1 overflow-y-auto touch-scroll pb-28 md:pb-6 space-y-4 glass-strong rounded-2xl p-4 border border-white/10"
         >
           {activeChat.messages.length === 0 ? (
             <div className="h-full flex flex-col justify-center items-center text-gray-400">
@@ -389,7 +389,7 @@ export default function App() {
                   </div>
                 )}
                 <div
-                  className={`max-w-[80%] md:max-w-[70%] p-3 rounded-xl text-sm transition-transform hover:scale-[1.01] ${
+                  className={`max-w-[80%] md:max-w-[70%] p-3 rounded-xl text-sm ${
                     msg.sender === "user"
                       ? "bg-gradient-to-tr from-indigo-500 to-violet-600 text-white"
                       : "glass text-gray-100"
@@ -405,21 +405,11 @@ export default function App() {
             ))
           )}
 
-          {loading && (
-            <div className="flex items-center space-x-2 text-white/80">
-              <div className="typing">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-              <span className="text-xs text-gray-300">Gemini is thinking...</span>
-            </div>
-          )}
           <div ref={messagesEndRef} />
         </div>
 
          {/* Input */}
-        <div className="composer-sticky mt-3 flex items-center gap-1 glass-strong rounded-xl p-2 md:px-4 border border-white/10 animate-card">
+        <div className="composer-sticky mt-3 flex items-center gap-1 glass-strong rounded-xl p-2 md:px-4 border border-white/10">
           <input
             ref={inputRef}
             value={input}
@@ -450,9 +440,9 @@ export default function App() {
           <button
             onClick={sendMessage}
             disabled={loading}
-             className="p-2  bg-gradient-to-r from-indigo-500 to-violet-600 rounded-md text-white hover:scale-105 transition"
+             className="p-2 bg-gradient-to-r from-indigo-500 to-violet-600 rounded-md text-white"
           >
-             {loading ? <span className="spinner" /> : <FiSend />}
+             <FiSend />
           </button>
         </div>
       </main>
