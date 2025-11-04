@@ -32,6 +32,20 @@ const cleanResponse = (text) =>
     .replace(/```[\s\S]*?```/g, "")
     .replace(/`([^`]*)`/g, "$1");
 
+// Create a short, readable title from the user's first message
+const generateTitleFromText = (text) => {
+  if (!text) return "New Chat";
+  const cleaned = text
+    .replace(/\s+/g, " ")
+    .replace(/[\r\n]+/g, " ")
+    .replace(/[`_*#>\[\](){}]/g, "")
+    .trim();
+  const words = cleaned.split(" ");
+  const slice = words.slice(0, 7).join(" ");
+  const capped = slice.replace(/(^|\s)\S/g, (c) => c.toUpperCase());
+  return capped.length > 50 ? capped.slice(0, 47) + "…" : capped;
+};
+
 // Escape HTML to avoid injection; we only render what we generate
 const escapeHtml = (s) =>
   s
@@ -181,7 +195,10 @@ export default function App() {
     if (!text) return;
     setIsNearBottom(true); // ensure we auto-scroll after sending
     const userMsg = { id: crypto.randomUUID(), sender: "user", text };
-    const updated = { ...activeChat, messages: [...activeChat.messages, userMsg] };
+    // Auto-title: if first message or generic title, rename chat to the topic
+    const isGenericTitle = !activeChat.title || /^Chat\s\d+$/i.test(activeChat.title) || /Welcome/i.test(activeChat.title);
+    const newTitle = activeChat.messages.length === 0 || isGenericTitle ? generateTitleFromText(text) : activeChat.title;
+    const updated = { ...activeChat, title: newTitle, messages: [...activeChat.messages, userMsg] };
     updateChat(updated);
     setInput("");
     setLoading(true);
@@ -322,11 +339,7 @@ export default function App() {
                  {!sidebarCollapsed && <span className="truncate font-medium">{c.title}</span>}
                  <span className="text-xs text-gray-400">{c.messages.length}</span>
                </div>
-               {!sidebarCollapsed && (
-                 <div className="text-xs text-gray-400 truncate">
-                   {c.messages[c.messages.length - 1]?.text || "No messages yet"}
-                 </div>
-               )}
+               {/* Description preview removed per request */}
             </div>
           ))}
         </div>
