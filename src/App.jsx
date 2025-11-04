@@ -7,6 +7,9 @@ import {
   FiDownload,
   FiSearch,
   FiTrash2,
+  FiCopy,
+  FiEdit2,
+  FiThumbsUp,
 } from "react-icons/fi";
 
 const API_KEY = "AIzaSyDQDgq_H-ywd_w9yjJFtwgfkV1VU39Rf3w";
@@ -144,6 +147,34 @@ export default function App() {
     setIsRecording(!isRecording);
   };
 
+  // Message toolbar actions
+  const copyMessage = (text) => navigator.clipboard?.writeText(text);
+  const deleteMessage = (msgId) => {
+    const updated = {
+      ...activeChat,
+      messages: activeChat.messages.filter((m) => m.id !== msgId),
+    };
+    updateChat(updated);
+  };
+  const editMessage = (msgId) => {
+    const msg = activeChat.messages.find((m) => m.id === msgId);
+    if (!msg) return;
+    const newText = window.prompt("Edit message", msg.text);
+    if (typeof newText !== "string") return;
+    const updated = {
+      ...activeChat,
+      messages: activeChat.messages.map((m) => (m.id === msgId ? { ...m, text: newText } : m)),
+    };
+    updateChat(updated);
+  };
+  const toggleLikeMessage = (msgId) => {
+    const updated = {
+      ...activeChat,
+      messages: activeChat.messages.map((m) => (m.id === msgId ? { ...m, liked: !m.liked } : m)),
+    };
+    updateChat(updated);
+  };
+
   const inlineCss = `
     .bg-grad { background: radial-gradient(circle at 10% 10%, rgba(139,92,246,0.12), transparent 40%), radial-gradient(circle at 90% 90%, rgba(99,102,241,0.1), transparent 40%), linear-gradient(180deg, #130028 0%, #1c0036 50%, #120023 100%); }
     .glass { backdrop-filter: blur(14px); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); }
@@ -243,9 +274,26 @@ export default function App() {
             </div>
           ) : (
             activeChat.messages.map((msg) => (
-              <div key={msg.id} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-                 <div
-                   className={`max-w-[80%] md:max-w-[70%] p-3 rounded-xl text-sm transition-transform hover:scale-[1.01] ${
+              <div key={msg.id} className={`group relative flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
+                {/* Hover toolbar (user messages only) */
+                msg.sender === "user" && (
+                  <div className={`absolute -top-3 ${msg.sender === "user" ? "right-0" : "left-0"} flex gap-1 opacity-0 group-hover:opacity-100 transition`}>
+                    <button title="Like" onClick={() => toggleLikeMessage(msg.id)} className={`p-1.5 rounded-md text-xs ${msg.liked ? "bg-white/20 text-white" : "bg-white/10 hover:bg-white/20"}`}>
+                      <FiThumbsUp />
+                    </button>
+                    <button title="Copy" onClick={() => copyMessage(msg.text)} className="p-1.5 rounded-md text-xs bg-white/10 hover:bg-white/20">
+                      <FiCopy />
+                    </button>
+                    <button title="Edit" onClick={() => editMessage(msg.id)} className="p-1.5 rounded-md text-xs bg-white/10 hover:bg-white/20">
+                      <FiEdit2 />
+                    </button>
+                    <button title="Delete" onClick={() => deleteMessage(msg.id)} className="p-1.5 rounded-md text-xs bg-white/10 hover:bg-white/20">
+                      <FiTrash2 />
+                    </button>
+                  </div>
+                )}
+                <div
+                  className={`max-w-[80%] md:max-w-[70%] p-3 rounded-xl text-sm transition-transform hover:scale-[1.01] ${
                     msg.sender === "user"
                       ? "bg-gradient-to-tr from-indigo-500 to-violet-600 text-white"
                       : "glass text-gray-100"
